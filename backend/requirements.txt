@@ -1,0 +1,6 @@
+flask
+flask-cors
+faster-whisper
+groq
+python-dotenv
+flask-sqlalchemy
