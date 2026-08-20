@@ -2,14 +2,14 @@
 
 A full-stack AI-powered Meeting Summarizer built with a **Python Flask backend** and a modern **React + Vite + Tailwind CSS frontend**.
 
-- 🎙️ **Transcription**: High-speed speech-to-text powered by Groq's hosted Whisper API (`whisper-large-v3-turbo`).
-- 🧠 **AI Summarization**: Structured summarization powered by Groq's `openai/gpt-oss-120b` model highlighting **Key Decisions** and **Action Items**.
-- 🗄️ **Storage**: Local SQLite database via SQLAlchemy storing transcripts, summaries, and meeting records.
-- 🎨 **UI / UX**: Modern dark theme, glassmorphism cards, interactive checkboxes for action items, copy to clipboard, and past meeting history.
+- **Transcription**: High-speed speech-to-text powered by Groq's hosted Whisper API (`whisper-large-v3-turbo`).
+- **AI Summarization**: Structured summarization powered by Groq's `openai/gpt-oss-120b` model highlighting **Key Decisions** and **Action Items**.
+- **Storage**: Local SQLite database via SQLAlchemy storing transcripts, summaries, and meeting records.
+- **UI / UX**: Modern dark theme, glassmorphism cards, interactive checkboxes for action items, copy to clipboard, and past meeting history.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 /
@@ -41,7 +41,7 @@ A full-stack AI-powered Meeting Summarizer built with a **Python Flask backend**
 
 ---
 
-## ⚙️ Getting Started
+## Getting Started
 
 ### 1. Backend Setup (Flask)
 
@@ -104,7 +104,7 @@ A full-stack AI-powered Meeting Summarizer built with a **Python Flask backend**
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -118,7 +118,7 @@ A full-stack AI-powered Meeting Summarizer built with a **Python Flask backend**
 
 ---
 
-## 🔒 Dependencies
+## Dependencies
 
 ### Backend (`requirements.txt`)
 - `flask`
