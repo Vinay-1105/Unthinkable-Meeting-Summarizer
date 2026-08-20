@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { Copy, Check, FileText, Download, Sparkles, Loader2, Search, Volume2 } from 'lucide-react';
 
-export default function TranscriptViewer({ 
-  transcript, 
-  segments = [], 
-  filename, 
-  onSummarize, 
-  isSummarizing 
+export default function TranscriptViewer({
+  transcript,
+  segments = [],
+  filename,
+  onSummarize,
+  isSummarizing
 }) {
   const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('full'); // 'full' | 'segments'
+  const [activeTab, setActiveTab] = useState('full');
 
   const handleCopy = () => {
     if (!transcript) return;
@@ -39,12 +39,12 @@ export default function TranscriptViewer({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const filteredSegments = segments.filter(seg => 
+  const filteredSegments = segments.filter(seg =>
     seg.text.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="glass-panel rounded-2xl p-6 border border-slate-800 flex flex-col h-full">
+    <div className="glass-panel rounded-2xl p-6 border border-slate-800 flex flex-col">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -73,21 +73,19 @@ export default function TranscriptViewer({
             <div className="bg-slate-900 rounded-lg p-0.5 border border-slate-800 flex text-xs">
               <button
                 onClick={() => setActiveTab('full')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${
-                  activeTab === 'full' 
-                    ? 'bg-slate-800 text-white font-medium shadow-sm' 
+                className={`px-2.5 py-1 rounded-md transition-colors ${activeTab === 'full'
+                    ? 'bg-slate-800 text-white font-medium shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
-                }`}
+                  }`}
               >
                 Text
               </button>
               <button
                 onClick={() => setActiveTab('segments')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${
-                  activeTab === 'segments' 
-                    ? 'bg-slate-800 text-white font-medium shadow-sm' 
+                className={`px-2.5 py-1 rounded-md transition-colors ${activeTab === 'segments'
+                    ? 'bg-slate-800 text-white font-medium shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
-                }`}
+                  }`}
               >
                 Timestamps
               </button>
@@ -133,7 +131,7 @@ export default function TranscriptViewer({
         ) : (
           <div className="space-y-2">
             {filteredSegments.map((seg, idx) => (
-              <div 
+              <div
                 key={idx}
                 className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/60 hover:border-slate-700/80 transition-colors flex items-start space-x-3 text-xs"
               >
@@ -153,16 +151,15 @@ export default function TranscriptViewer({
       {/* Summarize Trigger Footer */}
       <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
         <div className="text-xs text-slate-400 hidden sm:block">
-          Powered by <span className="text-amber-400 font-medium">Groq LLaMA 3.3 70B</span>
+          Powered by <span className="text-amber-400 font-medium">Groq GPT-OSS 120B</span>
         </div>
         <button
           onClick={onSummarize}
           disabled={isSummarizing || !transcript}
-          className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all shadow-lg ${
-            isSummarizing || !transcript
+          className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all shadow-lg ${isSummarizing || !transcript
               ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
               : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-emerald-500/20'
-          }`}
+            }`}
         >
           {isSummarizing ? (
             <>

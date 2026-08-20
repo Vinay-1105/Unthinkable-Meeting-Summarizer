@@ -4,12 +4,12 @@ import AudioUploader from './components/AudioUploader';
 import TranscriptViewer from './components/TranscriptViewer';
 import SummaryCard from './components/SummaryCard';
 import MeetingHistory from './components/MeetingHistory';
-import { 
-  Sparkles, 
-  Mic, 
-  FileText, 
-  CheckCircle2, 
-  Loader2, 
+import {
+  Sparkles,
+  Mic,
+  FileText,
+  CheckCircle2,
+  Loader2,
   AlertCircle,
   ArrowRight,
   RefreshCw
@@ -20,14 +20,13 @@ export default function App() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [step, setStep] = useState(1); // 1: Upload, 2: Transcribe, 3: Summarize / View
+  const [step, setStep] = useState(1);
 
   const handleUploadSuccess = async (uploadData) => {
     setActiveMeeting(uploadData.meeting);
     setErrorMessage(null);
     setStep(2);
 
-    // Automatically trigger transcription once uploaded
     await handleTranscribe(uploadData.meeting_id, uploadData.saved_filename);
   };
 
@@ -127,14 +126,13 @@ export default function App() {
         <div className="mb-8 max-w-3xl mx-auto">
           <div className="flex items-center justify-between relative">
             <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-800 -translate-y-1/2 z-0" />
-            
+
             {/* Step 1 */}
             <div className="relative z-10 flex flex-col items-center">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all ${
-                step >= 1 
-                  ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/20' 
-                  : 'bg-slate-900 border-slate-700 text-slate-400'
-              }`}>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all ${step >= 1
+                ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/20'
+                : 'bg-slate-900 border-slate-700 text-slate-400'
+                }`}>
                 1
               </div>
               <span className="text-[11px] font-medium text-slate-400 mt-1.5">Upload Audio</span>
@@ -142,11 +140,10 @@ export default function App() {
 
             {/* Step 2 */}
             <div className="relative z-10 flex flex-col items-center">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all ${
-                step >= 2 
-                  ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/20' 
-                  : 'bg-slate-900 border-slate-700 text-slate-400'
-              }`}>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all ${step >= 2
+                ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/20'
+                : 'bg-slate-900 border-slate-700 text-slate-400'
+                }`}>
                 2
               </div>
               <span className="text-[11px] font-medium text-slate-400 mt-1.5">Whisper Transcribe</span>
@@ -154,11 +151,10 @@ export default function App() {
 
             {/* Step 3 */}
             <div className="relative z-10 flex flex-col items-center">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all ${
-                step >= 3 
-                  ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/20' 
-                  : 'bg-slate-900 border-slate-700 text-slate-400'
-              }`}>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all ${step >= 3
+                ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/20'
+                : 'bg-slate-900 border-slate-700 text-slate-400'
+                }`}>
                 3
               </div>
               <span className="text-[11px] font-medium text-slate-400 mt-1.5">Groq Summary</span>
@@ -178,7 +174,7 @@ export default function App() {
         )}
 
         {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-6">
             {/* Step 1: Uploading Audio */}
@@ -206,7 +202,7 @@ export default function App() {
                 <div>
                   <h3 className="text-lg font-semibold text-white">Transcribing Meeting Audio</h3>
                   <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                    Running faster-whisper (base model) on CPU. Depending on audio length, this may take a few moments.
+                    Running Groq Whisper (whisper-large-v3-turbo) in the cloud. Fast and accurate transcription in progress.
                   </p>
                 </div>
               </div>
@@ -214,7 +210,7 @@ export default function App() {
 
             {/* Step 2: Transcript Viewer */}
             {activeMeeting?.transcript && (
-              <TranscriptViewer 
+              <TranscriptViewer
                 transcript={activeMeeting.transcript}
                 segments={activeMeeting.segments || []}
                 filename={activeMeeting.filename}
@@ -225,18 +221,18 @@ export default function App() {
 
             {/* Step 3: Structured Summary Card */}
             {activeMeeting?.summary && (
-              <SummaryCard 
-                summary={activeMeeting.summary} 
-                filename={activeMeeting.filename} 
+              <SummaryCard
+                summary={activeMeeting.summary}
+                filename={activeMeeting.filename}
               />
             )}
           </div>
 
           {/* History Sidebar */}
           <div className="lg:col-span-4">
-            <MeetingHistory 
-              onSelectMeeting={handleSelectHistoryMeeting} 
-              activeMeetingId={activeMeeting?.id} 
+            <MeetingHistory
+              onSelectMeeting={handleSelectHistoryMeeting}
+              activeMeetingId={activeMeeting?.id}
             />
           </div>
         </div>

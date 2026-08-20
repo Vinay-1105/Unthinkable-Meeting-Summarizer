@@ -2,8 +2,8 @@
 
 A full-stack AI-powered Meeting Summarizer built with a **Python Flask backend** and a modern **React + Vite + Tailwind CSS frontend**.
 
-- 🎙️ **Transcription**: High-speed speech-to-text powered by `faster-whisper` (base model on CPU).
-- 🧠 **AI Summarization**: Structured summarization powered by Groq's `llama-3.3-70b-versatile` model highlighting **Key Decisions** and **Action Items**.
+- 🎙️ **Transcription**: High-speed speech-to-text powered by Groq's hosted Whisper API (`whisper-large-v3-turbo`).
+- 🧠 **AI Summarization**: Structured summarization powered by Groq's `openai/gpt-oss-120b` model highlighting **Key Decisions** and **Action Items**.
 - 🗄️ **Storage**: Local SQLite database via SQLAlchemy storing transcripts, summaries, and meeting records.
 - 🎨 **UI / UX**: Modern dark theme, glassmorphism cards, interactive checkboxes for action items, copy to clipboard, and past meeting history.
 
@@ -16,7 +16,7 @@ A full-stack AI-powered Meeting Summarizer built with a **Python Flask backend**
 ├── backend/
 │   ├── app.py              # Flask server, CORS, routes & Groq/Whisper pipelines
 │   ├── models.py           # SQLite SQLAlchemy model for meetings
-│   ├── requirements.txt    # Minimal backend dependencies
+│   ├── requirements.txt    # Minimal backend dependencies (no local whisper)
 │   ├── .env.example        # Environment variable template
 │   └── uploads/            # Audio upload folder (.gitignore managed)
 ├── frontend/
@@ -109,8 +109,8 @@ A full-stack AI-powered Meeting Summarizer built with a **Python Flask backend**
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/upload` | Uploads an audio file (`.mp3`, `.wav`, `.m4a`) to `backend/uploads/` |
-| `POST` | `/api/transcribe` | Transcribes audio using `faster-whisper` (base, CPU) |
-| `POST` | `/api/summarize` | Summarizes transcript using Groq API (`llama-3.3-70b-versatile`) |
+| `POST` | `/api/transcribe` | Transcribes audio using Groq Whisper API (`whisper-large-v3-turbo`) |
+| `POST` | `/api/summarize` | Summarizes transcript using Groq API (`openai/gpt-oss-120b`) |
 | `GET` | `/api/meetings` | Returns history of all processed meetings |
 | `GET` | `/api/meetings/<id>` | Returns details for a single meeting |
 | `DELETE` | `/api/meetings/<id>` | Deletes a meeting and its uploaded audio file |
@@ -123,7 +123,6 @@ A full-stack AI-powered Meeting Summarizer built with a **Python Flask backend**
 ### Backend (`requirements.txt`)
 - `flask`
 - `flask-cors`
-- `faster-whisper`
 - `groq`
 - `python-dotenv`
 - `flask-sqlalchemy`

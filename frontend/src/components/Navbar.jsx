@@ -22,7 +22,7 @@ export default function Navbar({ onReset }) {
                 v1.0
               </span>
             </div>
-            <p className="text-xs text-slate-400 hidden sm:block">Whisper + Groq LLaMA 3.3 Summarizer</p>
+            <p className="text-xs text-slate-400 hidden sm:block">Whisper + Groq GPT-OSS 120B Summarizer</p>
           </div>
         </div>
 
@@ -30,12 +30,12 @@ export default function Navbar({ onReset }) {
         <div className="flex items-center space-x-3 text-xs">
           <div className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
             <Cpu className="w-3.5 h-3.5 text-blue-400" />
-            <span>faster-whisper (CPU)</span>
+            <span>Groq Whisper (Turbo)</span>
           </div>
 
           <div className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
             <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>Groq LLaMA 3.3 70B</span>
+            <span>Groq GPT-OSS 120B</span>
           </div>
 
           <button

@@ -5,7 +5,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
-from faster_whisper import WhisperModel
 from groq import Groq
 
 from models import db, Meeting
@@ -25,7 +24,7 @@ UPLOAD_FOLDER.mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'm4a'}
 
 app.config['UPLOAD_FOLDER'] = str(UPLOAD_FOLDER)
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB Max File Size
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB Max Request Upload Size
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f"sqlite:///{BASE_DIR / 'meetings.db'}")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -34,21 +33,6 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
-
-# Lazy-loaded faster-whisper model (base model on CPU)
-whisper_model = None
-
-
-def get_whisper_model():
-    """
-    Lazy initialization of faster-whisper model to optimize startup time.
-    Uses 'base' model on 'cpu'.
-    """
-    global whisper_model
-    if whisper_model is None:
-        # compute_type='int8' is efficient for CPU inference
-        whisper_model = WhisperModel("base", device="cpu", compute_type="int8")
-    return whisper_model
 
 
 def allowed_file(filename: str) -> bool:
@@ -62,9 +46,9 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'service': 'Meeting Summarizer Backend',
-        'whisper_device': 'CPU',
-        'whisper_model': 'base',
-        'groq_model': 'llama-3.3-70b-versatile'
+        'transcription_engine': 'Groq Whisper API',
+        'whisper_model': 'whisper-large-v3-turbo',
+        'groq_model': 'openai/gpt-oss-120b'
     }), 200
 
 
@@ -88,7 +72,6 @@ def upload_audio():
         }), 400
 
     original_filename = secure_filename(file.filename)
-    extension = original_filename.rsplit('.', 1)[1].lower()
     
     # Generate unique filename to avoid overwriting existing files
     unique_filename = f"{uuid.uuid4().hex}_{original_filename}"
@@ -119,8 +102,9 @@ def upload_audio():
 def transcribe_audio():
     """
     Endpoint POST /api/transcribe
-    Takes a saved filename (or meeting_id), runs faster-whisper (base model, CPU)
-    on the audio file, updates the database, and returns the transcript text.
+    Takes a saved filename (or meeting_id), calls Groq's hosted Whisper API
+    using the 'whisper-large-v3-turbo' model, updates the SQLite database,
+    and returns the transcript text.
     """
     data = request.get_json() or {}
     filename = data.get('filename')
@@ -148,29 +132,72 @@ def transcribe_audio():
     if not os.path.exists(meeting.file_path):
         return jsonify({'error': f'Audio file not found at path: {meeting.file_path}'}), 404
 
+    # Verify GROQ_API_KEY presence
+    groq_api_key = os.getenv('GROQ_API_KEY')
+    if not groq_api_key or groq_api_key.strip() == 'your_groq_api_key_here':
+        meeting.status = 'failed'
+        db.session.commit()
+        return jsonify({
+            'error': 'GROQ_API_KEY is not configured. Please set your valid Groq API key in backend/.env'
+        }), 500
+
+    # Validate file size against Groq Audio API limit (25MB)
+    file_size = os.path.getsize(meeting.file_path)
+    if file_size > 25 * 1024 * 1024:
+        meeting.status = 'failed'
+        db.session.commit()
+        return jsonify({
+            'error': f'Audio file size ({file_size / (1024 * 1024):.1f} MB) exceeds Groq Whisper 25MB limit. Please upload a compressed or shorter audio clip.'
+        }), 400
+
     try:
         meeting.status = 'transcribing'
         db.session.commit()
 
-        # Run faster-whisper (base model, CPU)
-        model = get_whisper_model()
-        segments, info = model.transcribe(meeting.file_path, beam_size=5)
+        # Initialize Groq client
+        client = Groq(api_key=groq_api_key)
 
-        # Assemble full transcription text from segments
+        # Read binary audio data and call Groq Whisper API (whisper-large-v3-turbo)
+        with open(meeting.file_path, "rb") as audio_file:
+            audio_bytes = audio_file.read()
+            
+            transcription = client.audio.transcriptions.create(
+                file=(meeting.filename, audio_bytes),
+                model="whisper-large-v3-turbo",
+                response_format="verbose_json"
+            )
+
+        # Extract transcript text
+        if hasattr(transcription, 'text'):
+            full_transcript = transcription.text.strip()
+        elif isinstance(transcription, dict):
+            full_transcript = transcription.get('text', '').strip()
+        else:
+            full_transcript = str(transcription).strip()
+
+        # Extract segment breakdown with timestamps if available
         segment_list = []
-        transcript_parts = []
-        for segment in segments:
-            text = segment.text.strip()
-            if text:
-                transcript_parts.append(text)
-                segment_list.append({
-                    'start': segment.start,
-                    'end': segment.end,
-                    'text': text
-                })
+        raw_segments = getattr(transcription, 'segments', None) or (
+            transcription.get('segments') if isinstance(transcription, dict) else []
+        )
+        if raw_segments:
+            for seg in raw_segments:
+                if isinstance(seg, dict):
+                    segment_list.append({
+                        'start': seg.get('start', 0),
+                        'end': seg.get('end', 0),
+                        'text': seg.get('text', '').strip()
+                    })
+                else:
+                    segment_list.append({
+                        'start': getattr(seg, 'start', 0),
+                        'end': getattr(seg, 'end', 0),
+                        'text': getattr(seg, 'text', '').strip()
+                    })
 
-        full_transcript = " ".join(transcript_parts)
-        
+        language = getattr(transcription, 'language', 'en') or 'en'
+        duration = getattr(transcription, 'duration', None)
+
         # Save transcript to SQLite database
         meeting.transcript = full_transcript
         meeting.status = 'transcribed'
@@ -181,23 +208,35 @@ def transcribe_audio():
             'meeting_id': meeting.id,
             'filename': meeting.filename,
             'transcript': full_transcript,
-            'language': info.language,
-            'language_probability': info.language_probability,
-            'duration': info.duration,
+            'language': language,
+            'language_probability': 1.0,
+            'duration': duration,
             'segments': segment_list
         }), 200
 
     except Exception as e:
         meeting.status = 'failed'
         db.session.commit()
-        return jsonify({'error': f'Transcription failed: {str(e)}'}), 500
+
+        # Format user-friendly error messages
+        err_str = str(e)
+        if "api_key" in err_str.lower() or "authentication" in err_str.lower() or "unauthorized" in err_str.lower():
+            user_msg = "Invalid or expired Groq API key. Please check your GROQ_API_KEY in backend/.env"
+        elif "rate_limit" in err_str.lower() or "429" in err_str:
+            user_msg = "Groq API rate limit exceeded. Please wait a moment and retry."
+        elif "unsupported" in err_str.lower() or "format" in err_str.lower():
+            user_msg = "Unsupported audio format for Groq Whisper. Supported formats: mp3, wav, m4a, webm."
+        else:
+            user_msg = f"Groq Whisper transcription failed: {err_str}"
+
+        return jsonify({'error': user_msg}), 500
 
 
 @app.route('/api/summarize', methods=['POST'])
 def summarize_transcript():
     """
     Endpoint POST /api/summarize
-    Takes transcript text (and optional meeting_id), calls Groq API (llama-3.3-70b-versatile),
+    Takes transcript text (and optional meeting_id), calls Groq API (openai/gpt-oss-120b),
     generates a structured summary with 'Key Decisions' and 'Action Items',
     saves the result to SQLite database, and returns the summary.
     """
@@ -240,8 +279,13 @@ Make sure to strictly include the following structured sections:
    A clear bulleted list of all explicit decisions, consensus reached, and policies agreed upon during the meeting.
 
 3. ## Action Items
-   A structured list of tasks and commitments with assigned owners, deliverables, and deadlines if mentioned. Format as:
+   A structured list of clear, actionable tasks and commitments with assigned owners, deliverables, and deadlines if mentioned. Format each item strictly as:
    - [ ] **[Task Description]** - Assigned to: *[Owner/Team]* | Deadline: *[Date/Timeline or 'TBD']*
+
+   CRITICAL RULES FOR ACTION ITEMS:
+   - Identify the actual person or team responsible for the task.
+   - Ignore honorifics, colloquial titles, and conversational filler words like 'sir', 'ma'am', 'madam', 'boss', 'bro', 'buddy', 'mister' when identifying assignee names (e.g. "Sure sir, I will send the report" should assign to the speaker/responsible person or 'Team', never "Sir"). If an exact name is not mentioned, use the relevant role, team, or 'TBD'.
+   - Do not output empty bullets, placeholder separator lines ('--'), or stray asterisks.
 
 4. ## Discussion Highlights & Topics
    Key discussion points, debates, insights, and concerns raised during the conversation.
@@ -253,13 +297,13 @@ Transcript:
 \"\"\"{transcript_text}\"\"\"
 """
 
-        # Call Groq API with llama-3.3-70b-versatile
+        # Call Groq API with openai/gpt-oss-120b
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a professional meeting analysis assistant. Produce clear, actionable, structured markdown summaries highlighting Key Decisions and Action Items."
+                    "content": "You are a professional meeting analysis assistant. Produce clear, actionable, structured markdown summaries highlighting Key Decisions and Action Items. Accurately identify assignees while ignoring conversational filler words like 'sir' or 'ma'am'."
                 },
                 {
                     "role": "user",
@@ -282,14 +326,23 @@ Transcript:
             'message': 'Summary generated successfully',
             'meeting_id': meeting.id if meeting else None,
             'summary': summary_result,
-            'model': 'llama-3.3-70b-versatile'
+            'model': 'openai/gpt-oss-120b'
         }), 200
 
     except Exception as e:
         if meeting:
             meeting.status = 'failed'
             db.session.commit()
-        return jsonify({'error': f'Summarization failed: {str(e)}'}), 500
+
+        err_str = str(e)
+        if "api_key" in err_str.lower() or "authentication" in err_str.lower() or "unauthorized" in err_str.lower():
+            user_msg = "Invalid or expired Groq API key. Please check your GROQ_API_KEY in backend/.env"
+        elif "rate_limit" in err_str.lower() or "429" in err_str:
+            user_msg = "Groq API rate limit exceeded. Please wait a moment and retry."
+        else:
+            user_msg = f"Groq summarization failed: {err_str}"
+
+        return jsonify({'error': user_msg}), 500
 
 
 @app.route('/api/meetings', methods=['GET'])
