@@ -22,6 +22,12 @@ class Meeting(db.Model):
 
     def to_dict(self):
         """Serialize Meeting record to dictionary format for JSON responses."""
+        created_at_iso = None
+        if self.created_at:
+            iso_str = self.created_at.isoformat()
+            # Append 'Z' if naive UTC datetime to guarantee standard ISO-8601 UTC representation
+            created_at_iso = iso_str if iso_str.endswith('Z') else f"{iso_str}Z"
+
         return {
             'id': self.id,
             'filename': self.filename,
@@ -29,5 +35,5 @@ class Meeting(db.Model):
             'transcript': self.transcript,
             'summary': self.summary,
             'status': self.status,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': created_at_iso
         }

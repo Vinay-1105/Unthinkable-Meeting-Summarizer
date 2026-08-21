@@ -1,11 +1,47 @@
 /**
  * Format any ISO date string strictly in Indian Standard Time (IST - Asia/Kolkata).
  * Guaranteed to format consistently regardless of where the browser or server is deployed.
+ * 
+ * Handles:
+ * - UTC ISO strings with or without trailing 'Z' (e.g. "2026-08-21T17:33:40Z" or "2026-08-21T17:33:40")
+ * - SQLite raw date strings (e.g. "2026-08-21 17:33:40")
+ * - Date objects and epoch timestamps
  */
-export const formatIST = (dateString, options = {}) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return '';
+export const formatIST = (dateInput, options = {}) => {
+  if (!dateInput) return '';
+
+  let parsedDate;
+
+  if (dateInput instanceof Date) {
+    parsedDate = dateInput;
+  } else if (typeof dateInput === 'number') {
+    parsedDate = new Date(dateInput);
+  } else if (typeof dateInput === 'string') {
+    let normalized = dateInput.trim();
+
+    // Convert SQL "YYYY-MM-DD HH:MM:SS" to ISO "YYYY-MM-DDTHH:MM:SS"
+    if (normalized.includes(' ') && !normalized.includes('T')) {
+      normalized = normalized.replace(' ', 'T');
+    }
+
+    // If backend UTC string has no timezone offset or Z suffix, append 'Z'
+    // to prevent browser from mistakenly parsing it as local system time
+    const hasTimezone = normalized.endsWith('Z') || /[+-]\d{2}(:\d{2})?$/.test(normalized);
+    if (!hasTimezone) {
+      normalized = `${normalized}Z`;
+    }
+
+    parsedDate = new Date(normalized);
+
+    // Fallback if parsing failed
+    if (isNaN(parsedDate.getTime())) {
+      parsedDate = new Date(dateInput);
+    }
+  }
+
+  if (!parsedDate || isNaN(parsedDate.getTime())) {
+    return '';
+  }
 
   const defaultOptions = {
     timeZone: 'Asia/Kolkata',
@@ -21,7 +57,7 @@ export const formatIST = (dateString, options = {}) => {
     ...options,
   });
 
-  return `${formatter.format(date)} IST`;
+  return `${formatter.format(parsedDate)} IST`;
 };
 
 /**
@@ -45,7 +81,6 @@ export const sanitizeMarkdownText = (raw) => {
     } else if (str.startsWith('**')) {
       str = str.slice(2).trim();
     } else {
-      // If trailing part has unmatched **, remove last occurrence
       const lastIdx = str.lastIndexOf('**');
       if (lastIdx !== -1) {
         str = (str.slice(0, lastIdx) + str.slice(lastIdx + 2)).trim();
