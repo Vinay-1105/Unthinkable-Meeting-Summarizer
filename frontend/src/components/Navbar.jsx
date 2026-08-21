@@ -6,7 +6,7 @@ export default function Navbar({ onReset }) {
     <header className="sticky top-0 z-30 border-b border-obsidian-700/80 bg-obsidian-950/85 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand */}
-        <div 
+        <div
           onClick={onReset}
           className="flex items-center space-x-3 cursor-pointer group select-none"
         >
@@ -17,10 +17,7 @@ export default function Navbar({ onReset }) {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-lg text-white tracking-tight">MeetingAI</span>
-              <span className="text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
-                v1.2
-              </span>
+              <span className="font-bold text-lg text-white tracking-tight">Meeting Assistant</span>
             </div>
             <p className="text-xs text-slate-400 hidden sm:block">Turn conversations into clear decisions & next steps</p>
           </div>

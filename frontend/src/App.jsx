@@ -208,11 +208,10 @@ export default function App() {
 
             {/* Step 1 */}
             <div className="relative z-10 flex flex-col items-center">
-              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
-                step >= 1
-                  ? 'bg-gradient-to-tr from-indigo-600 to-violet-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/25'
-                  : 'bg-obsidian-900 border-obsidian-700 text-slate-400'
-              }`}>
+              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${step >= 1
+                ? 'bg-gradient-to-tr from-indigo-600 to-violet-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/25'
+                : 'bg-obsidian-900 border-obsidian-700 text-slate-400'
+                }`}>
                 1
               </div>
               <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5 text-center">Upload Audio</span>
@@ -220,11 +219,10 @@ export default function App() {
 
             {/* Step 2 */}
             <div className="relative z-10 flex flex-col items-center">
-              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
-                step >= 2
-                  ? 'bg-gradient-to-tr from-indigo-600 to-violet-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/25'
-                  : 'bg-obsidian-900 border-obsidian-700 text-slate-400'
-              }`}>
+              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${step >= 2
+                ? 'bg-gradient-to-tr from-indigo-600 to-violet-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/25'
+                : 'bg-obsidian-900 border-obsidian-700 text-slate-400'
+                }`}>
                 2
               </div>
               <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5 text-center">AI Transcribe</span>
@@ -232,11 +230,10 @@ export default function App() {
 
             {/* Step 3 */}
             <div className="relative z-10 flex flex-col items-center">
-              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
-                step >= 3
-                  ? 'bg-gradient-to-tr from-coral-500 to-amber-500 border-amber-400 text-white shadow-lg shadow-coral-500/25'
-                  : 'bg-obsidian-900 border-obsidian-700 text-slate-400'
-              }`}>
+              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${step >= 3
+                ? 'bg-gradient-to-tr from-coral-500 to-amber-500 border-amber-400 text-white shadow-lg shadow-coral-500/25'
+                : 'bg-obsidian-900 border-obsidian-700 text-slate-400'
+                }`}>
                 3
               </div>
               <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5 text-center">Smart Summary</span>
@@ -278,7 +275,7 @@ export default function App() {
                 <div className="mb-6 text-center max-w-lg mx-auto">
                   <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-3">
                     <Wand2 className="w-3.5 h-3.5 text-coral-400" />
-                    <span>Instant Audio Analysis</span>
+                    <span>Meeting Analysis</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                     Turn Meetings into Action
@@ -315,11 +312,10 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setActiveTab('summary')}
-                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${
-                      activeTab === 'summary'
-                        ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
-                    }`}
+                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'summary'
+                      ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
+                      }`}
                   >
                     <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-coral-400" />
                     <span>Summary</span>
@@ -328,11 +324,10 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setActiveTab('action_items')}
-                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${
-                      activeTab === 'action_items'
-                        ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
-                    }`}
+                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'action_items'
+                      ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
+                      }`}
                   >
                     <ListChecks className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-300" />
                     <span>Action Items</span>
@@ -341,11 +336,10 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setActiveTab('transcript')}
-                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${
-                      activeTab === 'transcript'
-                        ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
-                    }`}
+                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'transcript'
+                      ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
+                      }`}
                   >
                     <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300" />
                     <span>Transcript</span>
