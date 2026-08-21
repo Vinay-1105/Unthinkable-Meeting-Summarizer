@@ -2,18 +2,19 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
   Sparkles,
-  CheckSquare,
-  CheckCircle2,
-  ListChecks,
   ShieldCheck,
+  FileText,
   Copy,
   Check,
   Download,
-  FileText
+  ChevronDown,
+  ChevronRight,
+  MessageSquare,
+  Compass
 } from 'lucide-react';
 
 const markdownComponents = {
-  p: ({ children }) => <p className="mb-2.5 last:mb-0 leading-relaxed">{children}</p>,
+  p: ({ children }) => <p className="mb-2.5 last:mb-0 leading-relaxed text-slate-300">{children}</p>,
   strong: ({ children }) => <strong className="font-semibold text-slate-100">{children}</strong>,
   em: ({ children }) => <em className="text-slate-300 italic">{children}</em>,
   ul: ({ children }) => <ul className="list-disc list-outside pl-5 space-y-1.5 my-2.5">{children}</ul>,
@@ -34,59 +35,9 @@ const markdownComponents = {
   )
 };
 
-const actionItemMarkdownComponents = {
-  p: ({ children }) => <span>{children}</span>,
-  strong: ({ children }) => <strong className="font-semibold text-slate-100">{children}</strong>,
-  em: ({ children }) => <em className="text-emerald-400 font-medium not-italic">{children}</em>,
-  code: ({ children }) => (
-    <code className="font-mono text-xs bg-slate-800 text-emerald-300 px-1 py-0.5 rounded">
-      {children}
-    </code>
-  )
-};
-
-/**
- * Trims and sanitizes an action item line:
- * - Strips checkbox markdown, leading bullets, and empty bullet markers
- * - Eliminates stray placeholder hyphens ('--' or '---') and isolated asterisks
- * - Returns empty string if the line is purely whitespace/symbols to filter it out
- */
-const cleanActionItemText = (rawLine) => {
-  if (!rawLine) return '';
-  let text = rawLine.trim();
-
-  // Strip standard markdown checkbox syntax: "- [ ]", "- [x]", "* [ ]", "[ ]", etc.
-  text = text.replace(/^[-*•\s]*\[[ x]\]\s*/i, '');
-
-  // Strip leading bullet markers, dashes, asterisks
-  text = text.replace(/^[-*•\s]+/, '');
-
-  text = text.trim();
-
-  // Check if string is only separator characters (e.g. "--", "---", "***", "*", "**", "•", "—", "–")
-  if (!text || /^[-*—–_~`•\s]+$/.test(text)) {
-    return '';
-  }
-
-  // Trim stray leading/trailing hyphens, dashes, or separators
-  text = text.replace(/^[-—–]+\s*/, '').replace(/\s*[-—–]+$/, '');
-
-  // Strip stray standalone asterisks that are not closing/opening markdown
-  text = text.replace(/^(\*|\*\*)\s+(?!\*)/, '').replace(/(?<!\*)\s+(\*|\*\*)$/, '');
-
-  text = text.trim();
-
-  // Final check: if text is empty or just punctuation/dividers
-  if (!text || /^[-*—–_~`•\s]+$/.test(text)) {
-    return '';
-  }
-
-  return text;
-};
-
 export default function SummaryCard({ summary, filename }) {
   const [copied, setCopied] = useState(false);
-  const [checkedItems, setCheckedItems] = useState({});
+  const [expandedSections, setExpandedSections] = useState({});
 
   if (!summary) return null;
 
@@ -106,13 +57,14 @@ export default function SummaryCard({ summary, filename }) {
     URL.revokeObjectURL(url);
   };
 
-  const toggleCheck = (index) => {
-    setCheckedItems(prev => ({
+  const toggleSection = (sIdx) => {
+    setExpandedSections(prev => ({
       ...prev,
-      [index]: !prev[index]
+      [sIdx]: !prev[sIdx]
     }));
   };
 
+  // Parse markdown into sections
   const parseSections = (text) => {
     const lines = text.split('\n');
     const sections = [];
@@ -135,14 +87,53 @@ export default function SummaryCard({ summary, filename }) {
     return sections;
   };
 
-  const sections = parseSections(summary);
+  // Filter out Action Items from the Summary tab (rendered in its own tab)
+  const allSections = parseSections(summary);
+  const summarySections = allSections.filter(
+    s => !s.title.toLowerCase().includes('action') && !s.title.toLowerCase().includes('task')
+  );
 
-  const getSectionIcon = (title) => {
+  const getSectionMetadata = (title) => {
     const lower = title.toLowerCase();
-    if (lower.includes('decision')) return <ShieldCheck className="w-5 h-5 text-amber-400" />;
-    if (lower.includes('action') || lower.includes('task')) return <ListChecks className="w-5 h-5 text-emerald-400" />;
-    if (lower.includes('executive') || lower.includes('summary')) return <Sparkles className="w-5 h-5 text-blue-400" />;
-    return <FileText className="w-5 h-5 text-slate-400" />;
+    if (lower.includes('executive') || lower.includes('summary')) {
+      return {
+        icon: <Sparkles className="w-5 h-5 text-emerald-400" />,
+        color: 'text-emerald-300',
+        bg: 'bg-emerald-950/10 border-emerald-500/30',
+        isCollapsible: false,
+      };
+    }
+    if (lower.includes('decision')) {
+      return {
+        icon: <ShieldCheck className="w-5 h-5 text-amber-400" />,
+        color: 'text-amber-300',
+        bg: 'bg-amber-950/10 border-amber-500/30',
+        isCollapsible: false,
+      };
+    }
+    if (lower.includes('discussion') || lower.includes('highlight') || lower.includes('topic')) {
+      return {
+        icon: <MessageSquare className="w-5 h-5 text-blue-400" />,
+        color: 'text-blue-300',
+        bg: 'bg-slate-900/50 border-slate-800/80 hover:border-slate-700',
+        isCollapsible: true,
+      };
+    }
+    if (lower.includes('next step') || lower.includes('follow')) {
+      return {
+        icon: <Compass className="w-5 h-5 text-purple-400" />,
+        color: 'text-purple-300',
+        bg: 'bg-slate-900/50 border-slate-800/80 hover:border-slate-700',
+        isCollapsible: true,
+      };
+    }
+
+    return {
+      icon: <FileText className="w-5 h-5 text-slate-400" />,
+      color: 'text-slate-200',
+      bg: 'bg-slate-900/50 border-slate-800/80',
+      isCollapsible: false,
+    };
   };
 
   return (
@@ -150,7 +141,7 @@ export default function SummaryCard({ summary, filename }) {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30">
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
@@ -167,7 +158,7 @@ export default function SummaryCard({ summary, filename }) {
             onClick={handleCopy}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-medium transition-colors"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-300" />}
             <span>{copied ? 'Copied' : 'Copy MD'}</span>
           </button>
 
@@ -175,84 +166,81 @@ export default function SummaryCard({ summary, filename }) {
             onClick={handleDownload}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-medium transition-colors"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 text-slate-300" />
             <span>Download</span>
           </button>
         </div>
       </div>
 
-      {/* Structured Sections Content */}
-      <div className="mt-6 space-y-6">
-        {sections.map((section, sIdx) => {
+      {/* Sections Content */}
+      <div className="mt-6 space-y-4">
+        {summarySections.map((section, sIdx) => {
           const sectionContent = section.lines.join('\n').trim();
           if (!sectionContent && section.title === 'Overview') return null;
 
-          const isActionSection = section.title.toLowerCase().includes('action');
-          const isDecisionSection = section.title.toLowerCase().includes('decision');
+          const meta = getSectionMetadata(section.title);
+          const isExpanded = !!expandedSections[sIdx];
 
+          // Collapsible Accordion (Discussion Highlights & Next Steps)
+          if (meta.isCollapsible) {
+            return (
+              <div
+                key={sIdx}
+                className={`rounded-xl border transition-all overflow-hidden ${meta.bg}`}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleSection(sIdx)}
+                  className="w-full p-4 sm:p-5 flex items-center justify-between text-left transition-colors hover:bg-slate-800/40"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    {meta.icon}
+                    <h3 className={`text-sm sm:text-base font-bold tracking-tight ${meta.color}`}>
+                      {section.title}
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center space-x-2 text-slate-400">
+                    <span className="text-[11px] hidden sm:inline text-slate-500 font-medium">
+                      {isExpanded ? 'Click to collapse' : 'Click to expand'}
+                    </span>
+                    <div className={`p-1 rounded-md bg-slate-800/60 text-slate-400 transition-transform duration-200 ${
+                      isExpanded ? 'rotate-180' : ''
+                    }`}>
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
+                  </div>
+                </button>
+
+                {isExpanded && (
+                  <div className="px-5 pb-5 pt-1 border-t border-slate-800/60 text-xs sm:text-sm text-slate-300 leading-relaxed animate-in fade-in duration-200">
+                    <ReactMarkdown components={markdownComponents}>
+                      {sectionContent}
+                    </ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          // Default Visible Section (Executive Summary & Key Decisions)
           return (
             <div
               key={sIdx}
-              className={`p-5 rounded-xl border transition-all ${isDecisionSection
-                ? 'bg-amber-950/10 border-amber-500/30 shadow-sm'
-                : isActionSection
-                  ? 'bg-emerald-950/10 border-emerald-500/30 shadow-sm'
-                  : 'bg-slate-900/50 border-slate-800/80'
-                }`}
+              className={`p-5 rounded-xl border transition-all ${meta.bg}`}
             >
               <div className="flex items-center space-x-2.5 mb-3">
-                {getSectionIcon(section.title)}
-                <h3 className={`text-base font-bold tracking-tight ${isDecisionSection
-                  ? 'text-amber-300'
-                  : isActionSection
-                    ? 'text-emerald-300'
-                    : 'text-slate-100'
-                  }`}>
+                {meta.icon}
+                <h3 className={`text-base font-bold tracking-tight ${meta.color}`}>
                   {section.title}
                 </h3>
               </div>
 
-              {isActionSection ? (
-                <div className="space-y-2 text-sm text-slate-300">
-                  {section.lines
-                    .map((line, lIdx) => {
-                      const cleanText = cleanActionItemText(line);
-                      return { line, cleanText, lIdx };
-                    })
-                    .filter(({ cleanText }) => cleanText.length > 0)
-                    .map(({ cleanText, lIdx }) => {
-                      const itemKey = `${sIdx}-${lIdx}`;
-                      const isChecked = checkedItems[itemKey] || false;
-
-                      return (
-                        <div
-                          key={lIdx}
-                          onClick={() => toggleCheck(itemKey)}
-                          className={`flex items-start space-x-3 p-2.5 rounded-lg cursor-pointer transition-colors ${isChecked
-                            ? 'bg-emerald-900/20 text-slate-400 line-through'
-                            : 'hover:bg-slate-850 bg-slate-900/40 text-slate-200'
-                            }`}
-                        >
-                          <div className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded flex items-center justify-center border transition-colors ${isChecked ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-600 bg-slate-950'
-                            }`}>
-                            {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
-                          </div>
-                          <div className="text-xs sm:text-sm leading-relaxed flex-1">
-                            <ReactMarkdown components={actionItemMarkdownComponents}>
-                              {cleanText}
-                            </ReactMarkdown>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              ) : (
-                <div className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  <ReactMarkdown components={markdownComponents}>
-                    {sectionContent}
-                  </ReactMarkdown>
-                </div>
-              )}
+              <div className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                <ReactMarkdown components={markdownComponents}>
+                  {sectionContent}
+                </ReactMarkdown>
+              </div>
             </div>
           );
         })}

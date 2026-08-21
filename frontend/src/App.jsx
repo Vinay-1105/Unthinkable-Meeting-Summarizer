@@ -3,11 +3,13 @@ import Navbar from './components/Navbar';
 import AudioUploader from './components/AudioUploader';
 import TranscriptViewer from './components/TranscriptViewer';
 import SummaryCard from './components/SummaryCard';
+import ActionItemsViewer from './components/ActionItemsViewer';
 import MeetingHistory from './components/MeetingHistory';
 import {
   Sparkles,
   Mic,
   FileText,
+  ListChecks,
   CheckCircle2,
   Loader2,
   AlertCircle,
@@ -21,11 +23,13 @@ export default function App() {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [step, setStep] = useState(1);
+  const [activeTab, setActiveTab] = useState('summary'); // 'summary' | 'action_items' | 'transcript'
 
   const handleUploadSuccess = async (uploadData) => {
     setActiveMeeting(uploadData.meeting);
     setErrorMessage(null);
     setStep(2);
+    setActiveTab('transcript');
 
     await handleTranscribe(uploadData.meeting_id, uploadData.saved_filename);
   };
@@ -57,6 +61,7 @@ export default function App() {
         status: 'transcribed'
       }));
       setStep(2);
+      setActiveTab('transcript');
     } catch (err) {
       setErrorMessage(err.message || 'Transcription error occurred');
     } finally {
@@ -92,6 +97,7 @@ export default function App() {
         status: 'completed'
       }));
       setStep(3);
+      setActiveTab('summary');
     } catch (err) {
       setErrorMessage(err.message || 'Summarization error occurred');
     } finally {
@@ -104,10 +110,13 @@ export default function App() {
     setErrorMessage(null);
     if (meeting.summary) {
       setStep(3);
+      setActiveTab('summary');
     } else if (meeting.transcript) {
       setStep(2);
+      setActiveTab('transcript');
     } else {
       setStep(1);
+      setActiveTab('summary');
     }
   };
 
@@ -115,6 +124,7 @@ export default function App() {
     setActiveMeeting(null);
     setErrorMessage(null);
     setStep(1);
+    setActiveTab('summary');
   };
 
   return (
@@ -208,27 +218,112 @@ export default function App() {
               </div>
             )}
 
-            {/* Step 2: Transcript Viewer */}
-            {activeMeeting?.transcript && (
-              <TranscriptViewer
-                transcript={activeMeeting.transcript}
-                segments={activeMeeting.segments || []}
-                filename={activeMeeting.filename}
-                onSummarize={handleSummarize}
-                isSummarizing={isSummarizing}
-              />
-            )}
+            {/* Results Tabbed Interface */}
+            {activeMeeting?.transcript && !isTranscribing && (
+              <div className="space-y-6">
+                {/* Navigation Tabs Bar */}
+                <div className="flex items-center space-x-1.5 p-1.5 rounded-2xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-md">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('summary')}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                      activeTab === 'summary'
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Summary</span>
+                  </button>
 
-            {/* Step 3: Structured Summary Card */}
-            {activeMeeting?.summary && (
-              <SummaryCard
-                summary={activeMeeting.summary}
-                filename={activeMeeting.filename}
-              />
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('action_items')}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                      activeTab === 'action_items'
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <ListChecks className="w-4 h-4" />
+                    <span>Action Items</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('transcript')}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                      activeTab === 'transcript'
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Transcript</span>
+                  </button>
+                </div>
+
+                {/* Tab 1: Summary */}
+                {activeTab === 'summary' && (
+                  activeMeeting?.summary ? (
+                    <SummaryCard
+                      summary={activeMeeting.summary}
+                      filename={activeMeeting.filename}
+                    />
+                  ) : (
+                    <div className="glass-panel rounded-2xl p-8 border border-slate-800 text-center flex flex-col items-center justify-center space-y-3 min-h-[300px]">
+                      <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-emerald-400 border border-slate-800">
+                        <Sparkles className="w-6 h-6" />
+                      </div>
+                      <h3 className="text-base font-semibold text-slate-200">AI Summary Not Generated Yet</h3>
+                      <p className="text-xs text-slate-400 max-w-sm">
+                        Generate an AI summary to extract the executive overview, key decisions, and discussion topics.
+                      </p>
+                      <button
+                        onClick={handleSummarize}
+                        disabled={isSummarizing || !activeMeeting?.transcript}
+                        className="mt-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs sm:text-sm font-medium transition-all shadow-lg shadow-emerald-500/20 flex items-center space-x-2"
+                      >
+                        {isSummarizing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Generating AI Summary...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            <span>Generate AI Summary</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )
+                )}
+
+                {/* Tab 2: Action Items */}
+                {activeTab === 'action_items' && (
+                  <ActionItemsViewer
+                    summary={activeMeeting?.summary}
+                    filename={activeMeeting?.filename}
+                    onGoToTranscript={() => setActiveTab('transcript')}
+                  />
+                )}
+
+                {/* Tab 3: Transcript */}
+                {activeTab === 'transcript' && (
+                  <TranscriptViewer
+                    transcript={activeMeeting.transcript}
+                    segments={activeMeeting.segments || []}
+                    filename={activeMeeting.filename}
+                    onSummarize={handleSummarize}
+                    isSummarizing={isSummarizing}
+                  />
+                )}
+              </div>
             )}
           </div>
 
-          {/* History Sidebar */}
+          {/* Persistent History Sidebar */}
           <div className="lg:col-span-4">
             <MeetingHistory
               onSelectMeeting={handleSelectHistoryMeeting}
