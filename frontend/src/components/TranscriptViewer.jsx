@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, FileText, Download, Sparkles, Loader2, Search, Volume2 } from 'lucide-react';
+import { Copy, Check, FileText, Download, Sparkles, Loader2, Search } from 'lucide-react';
 
 export default function TranscriptViewer({
   transcript,
@@ -44,24 +44,24 @@ export default function TranscriptViewer({
   );
 
   return (
-    <div className="glass-panel rounded-2xl p-6 border border-slate-800 flex flex-col">
+    <div className="glass-panel rounded-3xl p-5 sm:p-7 border border-obsidian-700 flex flex-col shadow-sm">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-obsidian-700">
         <div>
-          <div className="flex items-center space-x-2">
-            <span className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <div className="flex items-center space-x-2.5">
+            <span className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/25">
               <FileText className="w-4 h-4" />
             </span>
-            <h3 className="text-base font-semibold text-slate-100">Meeting Transcript</h3>
+            <h3 className="text-base font-bold text-slate-100">Full Audio Transcript</h3>
           </div>
-          <div className="flex items-center space-x-3 text-xs text-slate-400 mt-1">
+          <div className="flex flex-wrap items-center gap-x-2 text-xs text-slate-400 mt-1">
             <span>{wordCount.toLocaleString()} words</span>
             <span>•</span>
             <span>~{estimatedReadTime} min read</span>
             {filename && (
               <>
                 <span>•</span>
-                <span className="truncate max-w-[150px] text-slate-300">{filename}</span>
+                <span className="truncate max-w-[180px] text-slate-300">{filename}</span>
               </>
             )}
           </div>
@@ -70,11 +70,11 @@ export default function TranscriptViewer({
         {/* Action Controls */}
         <div className="flex items-center space-x-2">
           {segments && segments.length > 0 && (
-            <div className="bg-slate-900 rounded-lg p-0.5 border border-slate-800 flex text-xs">
+            <div className="bg-obsidian-900 rounded-xl p-0.5 border border-obsidian-700 flex text-xs">
               <button
                 onClick={() => setActiveTab('full')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${activeTab === 'full'
-                    ? 'bg-slate-800 text-white font-medium shadow-sm'
+                className={`px-3 py-1.5 rounded-lg transition-all ${activeTab === 'full'
+                    ? 'bg-indigo-600 text-white font-medium shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                   }`}
               >
@@ -82,8 +82,8 @@ export default function TranscriptViewer({
               </button>
               <button
                 onClick={() => setActiveTab('segments')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${activeTab === 'segments'
-                    ? 'bg-slate-800 text-white font-medium shadow-sm'
+                className={`px-3 py-1.5 rounded-lg transition-all ${activeTab === 'segments'
+                    ? 'bg-indigo-600 text-white font-medium shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                   }`}
               >
@@ -94,7 +94,7 @@ export default function TranscriptViewer({
 
           <button
             onClick={handleCopy}
-            className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-obsidian-850 hover:bg-obsidian-700 border border-obsidian-700 text-slate-300 hover:text-white transition-colors"
             title="Copy transcript"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -102,7 +102,7 @@ export default function TranscriptViewer({
 
           <button
             onClick={handleDownload}
-            className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-obsidian-850 hover:bg-obsidian-700 border border-obsidian-700 text-slate-300 hover:text-white transition-colors"
             title="Download TXT"
           >
             <Download className="w-4 h-4" />
@@ -110,16 +110,16 @@ export default function TranscriptViewer({
         </div>
       </div>
 
-      {/* Search Bar (if segments tab active or long transcript) */}
+      {/* Search Bar (if segments tab active) */}
       {activeTab === 'segments' && (
         <div className="mt-4 relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search transcript..."
+            placeholder="Search transcript segments..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-900/90 border border-slate-850 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50"
+            className="w-full bg-obsidian-900 border border-obsidian-700 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/60"
           />
         </div>
       )}
@@ -127,48 +127,49 @@ export default function TranscriptViewer({
       {/* Transcript Body */}
       <div className="mt-4 flex-1 overflow-y-auto max-h-[420px] pr-2 text-sm text-slate-300 leading-relaxed font-normal">
         {activeTab === 'full' ? (
-          <p className="whitespace-pre-wrap selection:bg-emerald-500/20">{transcript}</p>
+          <p className="whitespace-pre-wrap selection:bg-indigo-500/25">{transcript}</p>
         ) : (
           <div className="space-y-2">
             {filteredSegments.map((seg, idx) => (
               <div
                 key={idx}
-                className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/60 hover:border-slate-700/80 transition-colors flex items-start space-x-3 text-xs"
+                className="p-3 rounded-xl bg-obsidian-900/70 border border-obsidian-700/80 hover:border-obsidian-600 transition-colors flex items-start space-x-3 text-xs"
               >
-                <span className="font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex-shrink-0">
+                <span className="font-mono text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-md border border-indigo-500/25 flex-shrink-0 font-medium">
                   {formatTimestamp(seg.start)}
                 </span>
-                <span className="text-slate-200 flex-1">{seg.text}</span>
+                <span className="text-slate-200 flex-1 leading-relaxed">{seg.text}</span>
               </div>
             ))}
             {filteredSegments.length === 0 && (
-              <p className="text-xs text-slate-500 text-center py-6">No matching segments found.</p>
+              <p className="text-xs text-slate-400 text-center py-8">No matching transcript segments found.</p>
             )}
           </div>
         )}
       </div>
 
       {/* Summarize Trigger Footer */}
-      <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
-        <div className="text-xs text-slate-400 hidden sm:block">
+      <div className="mt-6 pt-4 border-t border-obsidian-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="text-xs text-slate-400 text-center sm:text-left">
           Powered by <span className="text-amber-400 font-medium">Groq GPT-OSS 120B</span>
         </div>
         <button
           onClick={onSummarize}
           disabled={isSummarizing || !transcript}
-          className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all shadow-lg ${isSummarizing || !transcript
-              ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
-              : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-emerald-500/20'
-            }`}
+          className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all shadow-lg ${
+            isSummarizing || !transcript
+              ? 'bg-obsidian-800 text-slate-500 cursor-not-allowed border border-obsidian-700'
+              : 'bg-gradient-to-r from-indigo-600 via-violet-600 to-coral-500 hover:from-indigo-500 hover:to-coral-400 text-white shadow-indigo-500/20 active:scale-[0.98]'
+          }`}
         >
           {isSummarizing ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Generating AI Summary...</span>
+              <span>Synthesizing Key Decisions...</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-coral-300" />
               <span>Generate AI Summary</span>
             </>
           )}

@@ -7,16 +7,17 @@ import {
   Download, 
   Sparkles, 
   CheckCircle2, 
-  Circle, 
-  FileText 
+  ArrowRight,
+  ClipboardList
 } from 'lucide-react';
+import { sanitizeMarkdownText } from '../utils/formatters';
 
 const actionItemMarkdownComponents = {
   p: ({ children }) => <span>{children}</span>,
   strong: ({ children }) => <strong className="font-semibold text-slate-100">{children}</strong>,
-  em: ({ children }) => <em className="text-emerald-400 font-medium not-italic">{children}</em>,
+  em: ({ children }) => <em className="text-coral-300 font-medium not-italic">{children}</em>,
   code: ({ children }) => (
-    <code className="font-mono text-xs bg-slate-800 text-emerald-300 px-1.5 py-0.5 rounded border border-slate-700">
+    <code className="font-mono text-xs bg-obsidian-850 text-indigo-300 px-1.5 py-0.5 rounded-md border border-obsidian-700">
       {children}
     </code>
   )
@@ -26,7 +27,7 @@ const actionItemMarkdownComponents = {
  * Trims and sanitizes an action item line:
  * - Strips checkbox markdown, leading bullets, and empty bullet markers
  * - Eliminates stray placeholder hyphens ('--' or '---') and isolated asterisks
- * - Returns empty string if the line is purely whitespace/symbols
+ * - Strips trailing unclosed '**' or '*' using comprehensive regex and balance checking
  */
 const cleanActionItemText = (rawLine) => {
   if (!rawLine) return '';
@@ -40,20 +41,15 @@ const cleanActionItemText = (rawLine) => {
 
   text = text.trim();
 
-  // Check if string is only separator characters (e.g. "--", "---", "***", "*", "**", "•", "—", "–")
+  // If line is empty or purely separators
   if (!text || /^[-*—–_~`•\s]+$/.test(text)) {
     return '';
   }
 
-  // Trim stray leading/trailing hyphens, dashes, or separators
-  text = text.replace(/^[-—–]+\s*/, '').replace(/\s*[-—–]+$/, '');
+  // Sanitize trailing/unclosed asterisks or hyphens
+  text = sanitizeMarkdownText(text);
 
-  // Strip stray standalone asterisks that are not closing/opening markdown
-  text = text.replace(/^(\*|\*\*)\s+(?!\*)/, '').replace(/(?<!\*)\s+(\*|\*\*)$/, '');
-
-  text = text.trim();
-
-  // Final check: if text is empty or just punctuation/dividers
+  // Final check: if text is empty or just punctuation
   if (!text || /^[-*—–_~`•\s]+$/.test(text)) {
     return '';
   }
@@ -136,21 +132,24 @@ export default function ActionItemsViewer({ summary, filename, onGoToTranscript 
 
   if (!summary) {
     return (
-      <div className="glass-panel rounded-2xl p-8 border border-slate-800 text-center flex flex-col items-center justify-center space-y-3 min-h-[320px]">
-        <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-slate-500 border border-slate-800">
-          <ListChecks className="w-6 h-6" />
+      <div className="glass-panel rounded-3xl p-8 sm:p-12 border border-obsidian-700 text-center flex flex-col items-center justify-center space-y-4 min-h-[340px]">
+        <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20 shadow-inner">
+          <ClipboardList className="w-7 h-7" />
         </div>
-        <h3 className="text-base font-semibold text-slate-200">No Action Items Generated Yet</h3>
-        <p className="text-xs text-slate-400 max-w-sm">
-          Generate an AI summary first to automatically detect and extract commitments, tasks, owners, and deadlines.
-        </p>
+        <div className="max-w-md">
+          <h3 className="text-base sm:text-lg font-bold text-slate-100">Ready to Extract Action Items</h3>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1.5 leading-relaxed">
+            Generate an AI summary to automatically detect and extract owners, commitments, tasks, and deadlines from this meeting.
+          </p>
+        </div>
         {onGoToTranscript && (
           <button
             onClick={onGoToTranscript}
-            className="mt-2 px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-medium transition-colors flex items-center space-x-1.5"
+            className="mt-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-coral-500 hover:from-indigo-500 hover:to-coral-400 text-white text-xs sm:text-sm font-medium transition-all shadow-md shadow-indigo-500/20 flex items-center space-x-2"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Go to Transcript & Summarize</span>
+            <Sparkles className="w-4 h-4 text-coral-300" />
+            <span>Generate Summary Now</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
@@ -158,24 +157,24 @@ export default function ActionItemsViewer({ summary, filename, onGoToTranscript 
   }
 
   return (
-    <div className="glass-panel-glow rounded-2xl p-6 sm:p-8 border border-emerald-500/30 flex flex-col">
+    <div className="glass-panel-glow rounded-3xl p-5 sm:p-8 border border-indigo-500/30 flex flex-col space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-obsidian-700">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-indigo-600/30 to-coral-500/20 text-coral-400 border border-coral-500/30 shadow-md">
             <ListChecks className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <h2 className="text-xl font-bold text-white tracking-tight">Action Items & Next Steps</h2>
+            <div className="flex items-center space-x-2.5">
+              <h2 className="text-xl font-bold text-white tracking-tight">Action Items & Deliverables</h2>
               {totalCount > 0 && (
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  {completedCount}/{totalCount} Done
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                  {completedCount} of {totalCount} Done
                 </span>
               )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Interactive task checklist extracted from meeting discussion
+              Interactive task checklist parsed from meeting discussion
             </p>
           </div>
         </div>
@@ -185,8 +184,8 @@ export default function ActionItemsViewer({ summary, filename, onGoToTranscript 
           <button
             onClick={handleCopy}
             disabled={totalCount === 0}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-medium transition-colors disabled:opacity-50"
-            title="Copy tasks"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-obsidian-850 hover:bg-obsidian-700 border border-obsidian-700 text-slate-200 text-xs font-medium transition-all active:scale-95 disabled:opacity-40"
+            title="Copy task checklist"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-300" />}
             <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -195,8 +194,8 @@ export default function ActionItemsViewer({ summary, filename, onGoToTranscript 
           <button
             onClick={handleDownload}
             disabled={totalCount === 0}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-medium transition-colors disabled:opacity-50"
-            title="Download Markdown"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-obsidian-850 hover:bg-obsidian-700 border border-obsidian-700 text-slate-200 text-xs font-medium transition-all active:scale-95 disabled:opacity-40"
+            title="Download task checklist"
           >
             <Download className="w-3.5 h-3.5 text-slate-300" />
             <span>Export</span>
@@ -206,14 +205,14 @@ export default function ActionItemsViewer({ summary, filename, onGoToTranscript 
 
       {/* Progress Bar */}
       {totalCount > 0 && (
-        <div className="mt-5 mb-2">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
-            <span>Task Completion</span>
-            <span className="font-medium text-slate-200">{progressPercent}%</span>
+        <div className="bg-obsidian-900/60 p-4 rounded-2xl border border-obsidian-700">
+          <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+            <span className="font-medium text-slate-300">Execution Progress</span>
+            <span className="font-semibold text-coral-400">{progressPercent}%</span>
           </div>
-          <div className="w-full h-1.5 rounded-full bg-slate-800/80 overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-obsidian-800 overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300 rounded-full"
+              className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-coral-400 transition-all duration-300 rounded-full shadow-sm"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -221,12 +220,12 @@ export default function ActionItemsViewer({ summary, filename, onGoToTranscript 
       )}
 
       {/* Checklist Content */}
-      <div className="mt-4 space-y-2.5">
+      <div className="space-y-2.5">
         {actionItems.length === 0 ? (
-          <div className="p-8 rounded-xl bg-slate-900/40 border border-slate-800/80 text-center">
-            <CheckCircle2 className="w-8 h-8 text-emerald-400/50 mx-auto mb-2" />
-            <p className="text-sm font-medium text-slate-300">No explicit action items found in transcript</p>
-            <p className="text-xs text-slate-500 mt-1">The discussion may have been purely informational or high-level.</p>
+          <div className="p-8 rounded-2xl bg-obsidian-900/40 border border-obsidian-700/80 text-center">
+            <CheckCircle2 className="w-8 h-8 text-indigo-400/50 mx-auto mb-2" />
+            <p className="text-sm font-semibold text-slate-300">No explicit action items detected</p>
+            <p className="text-xs text-slate-400 mt-1">This session may have been purely informative without assigned tasks.</p>
           </div>
         ) : (
           actionItems.map((item) => {
@@ -235,22 +234,22 @@ export default function ActionItemsViewer({ summary, filename, onGoToTranscript 
               <div
                 key={item.id}
                 onClick={() => toggleCheck(item.id)}
-                className={`flex items-start space-x-3.5 p-3.5 rounded-xl border transition-all cursor-pointer group ${
+                className={`flex items-start space-x-3.5 p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer group ${
                   isChecked
-                    ? 'bg-emerald-950/20 border-emerald-500/20 text-slate-400'
-                    : 'bg-slate-900/60 border-slate-800/90 hover:bg-slate-850 hover:border-slate-700 text-slate-200'
+                    ? 'bg-obsidian-900/40 border-obsidian-700/70 text-slate-400'
+                    : 'bg-obsidian-900/80 border-obsidian-700 hover:bg-obsidian-850 hover:border-indigo-500/40 text-slate-200 shadow-sm'
                 }`}
               >
-                <div className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
+                <div className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-lg flex items-center justify-center border transition-all ${
                   isChecked
-                    ? 'bg-emerald-500 border-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30'
-                    : 'border-slate-600 bg-slate-950/80 group-hover:border-slate-500'
+                    ? 'bg-gradient-to-tr from-indigo-600 to-violet-600 border-indigo-500 text-white shadow-sm shadow-indigo-500/30'
+                    : 'border-obsidian-600 bg-obsidian-950 group-hover:border-indigo-400'
                 }`}>
                   {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                 </div>
 
                 <div className={`text-xs sm:text-sm leading-relaxed flex-1 ${
-                  isChecked ? 'line-through text-slate-400/90' : 'text-slate-200'
+                  isChecked ? 'line-through text-slate-400' : 'text-slate-200'
                 }`}>
                   <ReactMarkdown components={actionItemMarkdownComponents}>
                     {item.text}
