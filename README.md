@@ -147,7 +147,7 @@ cd Meeting-Summarizer
 
 ## 🎥 Demo Video
 
-[Watch the demo video here](YOUR_DRIVE_LINK)
+Watch the demo video here - https://www.youtube.com/watch?v=Z0_jyGx38oQ 
 
 ---
 
