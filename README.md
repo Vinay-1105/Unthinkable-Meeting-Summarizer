@@ -145,6 +145,12 @@ cd Meeting-Summarizer
 
 ---
 
+## 🎥 Demo Video
+
+[Watch the demo video here](YOUR_DRIVE_LINK)
+
+---
+
 ## Project Structure
 
 ```

@@ -17,7 +17,7 @@ export default function Navbar({ onReset }) {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-lg text-white tracking-tight">Meeting Assistant</span>
+              <span className="font-bold text-lg text-white tracking-tight">Meeting Summarizer</span>
             </div>
             <p className="text-xs text-slate-400 hidden sm:block">Turn conversations into clear decisions & next steps</p>
           </div>
