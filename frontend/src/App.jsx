@@ -308,41 +308,41 @@ export default function App() {
             {activeMeeting?.transcript && !isTranscribing && (
               <div className="space-y-6">
                 {/* Responsive Navigation Tabs Bar */}
-                <div className="flex items-center space-x-1 p-1 sm:p-1.5 rounded-2xl bg-obsidian-900/90 border border-obsidian-700/90 backdrop-blur-md shadow-sm overflow-x-auto">
+                <div className="flex items-center space-x-1 sm:space-x-1.5 p-1 sm:p-1.5 rounded-2xl bg-obsidian-900/90 border border-obsidian-700/90 backdrop-blur-md shadow-sm w-full">
                   <button
                     type="button"
                     onClick={() => setActiveTab('summary')}
-                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'summary'
+                    className={`flex-1 min-w-0 flex items-center justify-center space-x-1 sm:space-x-2 py-2 sm:py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'summary'
                       ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
                       }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-coral-400" />
-                    <span>Summary</span>
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-coral-400 flex-shrink-0" />
+                    <span className="truncate">Summary</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setActiveTab('action_items')}
-                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'action_items'
+                    className={`flex-1 min-w-0 flex items-center justify-center space-x-1 sm:space-x-2 py-2 sm:py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'action_items'
                       ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
                       }`}
                   >
-                    <ListChecks className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-300" />
-                    <span>Action Items</span>
+                    <ListChecks className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-300 flex-shrink-0" />
+                    <span className="truncate">Action Items</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setActiveTab('transcript')}
-                    className={`flex-1 min-w-[90px] flex items-center justify-center space-x-1.5 sm:space-x-2 py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'transcript'
+                    className={`flex-1 min-w-0 flex items-center justify-center space-x-1 sm:space-x-2 py-2 sm:py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all select-none ${activeTab === 'transcript'
                       ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-obsidian-800/60'
                       }`}
                   >
-                    <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300" />
-                    <span>Transcript</span>
+                    <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 flex-shrink-0" />
+                    <span className="truncate">Transcript</span>
                   </button>
                 </div>
 

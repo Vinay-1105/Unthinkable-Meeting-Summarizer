@@ -55,7 +55,7 @@ export default function MeetingHistory({
         </div>
 
         {/* List Content */}
-        <div className="mt-4 flex-1 overflow-y-auto space-y-2.5 max-h-[520px] pr-1">
+        <div className="mt-3.5 flex-1 overflow-y-auto space-y-2.5 max-h-[520px] p-1">
           {meetings.length === 0 ? (
             <div className="text-center py-12 px-4 flex flex-col items-center">
               <div className="w-12 h-12 rounded-2xl bg-obsidian-850 flex items-center justify-center text-slate-500 border border-obsidian-750 mb-3">
@@ -75,7 +75,7 @@ export default function MeetingHistory({
                   onClick={() => onSelectMeeting(meeting)}
                   className={`p-3.5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between space-y-2 select-none ${
                     isSelected
-                      ? 'bg-gradient-to-br from-indigo-950/40 via-obsidian-850 to-obsidian-850 border-indigo-500/50 shadow-md shadow-indigo-950/40 scale-[1.01]'
+                      ? 'bg-gradient-to-br from-indigo-950/50 via-obsidian-850 to-obsidian-850 border-indigo-500/60 ring-1 ring-indigo-500/40 shadow-lg shadow-indigo-950/50'
                       : 'bg-obsidian-900/60 border-obsidian-700 hover:bg-obsidian-850 hover:border-obsidian-600'
                   }`}
                 >
