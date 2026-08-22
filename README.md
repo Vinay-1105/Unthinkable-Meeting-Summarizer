@@ -1,4 +1,4 @@
-# Meeting Summarizer
+# Meeting Assistant
 
 > An AI-powered full-stack application that transforms recorded meeting audio into accurate transcripts, structured executive summaries, and interactive action items.
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-Meeting Summarizer solves the challenge of information loss and productivity drain caused by long meetings. Instead of manually taking notes or re-listening to hours of audio, teams can upload their conversation recordings and immediately obtain timestamped transcripts, high-impact key decisions, and actionable task lists.
+Meeting Assistant solves the challenge of information loss and productivity drain caused by long meetings. Instead of manually taking notes or re-listening to hours of audio, teams can upload their conversation recordings and immediately obtain timestamped transcripts, high-impact key decisions, and actionable task lists.
 
 The application is engineered to meet rigorous evaluation standards across four core dimensions:
 1. **Transcription Accuracy**: Cloud-accelerated audio processing using state-of-the-art speech-to-text models.
