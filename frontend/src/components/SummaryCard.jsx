@@ -186,7 +186,6 @@ export default function SummaryCard({ summary, filename }) {
           const meta = getSectionMetadata(section.title);
           const isExpanded = !!expandedSections[sIdx];
 
-          // Collapsible Accordions (Discussion Highlights & Next Steps)
           if (meta.isCollapsible) {
             return (
               <div
@@ -213,9 +212,8 @@ export default function SummaryCard({ summary, filename }) {
                   </div>
 
                   <div className="flex items-center space-x-2 text-slate-400">
-                    <div className={`p-1.5 rounded-lg bg-obsidian-800/80 text-slate-400 border border-obsidian-700 transition-transform duration-200 ${
-                      isExpanded ? 'rotate-180 text-indigo-400' : ''
-                    }`}>
+                    <div className={`p-1.5 rounded-lg bg-obsidian-800/80 text-slate-400 border border-obsidian-700 transition-transform duration-200 ${isExpanded ? 'rotate-180 text-indigo-400' : ''
+                      }`}>
                       <ChevronDown className="w-4 h-4" />
                     </div>
                   </div>
