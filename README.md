@@ -184,16 +184,6 @@ Meeting-Summarizer/
 └── README.md                   # Project documentation & evaluation guide
 ```
 
----
-
-## Notes on Evaluation Criteria
-
-- **Transcription Accuracy**: Utilizing Groq's hosted `whisper-large-v3-turbo` model provides near-zero latency, robust background noise handling, and superior word error rate (WER) compared to lightweight local CPU models.
-- **Summary Quality & Prompt Effectiveness**: The system prompt enforces strict separation of concerns into distinct markdown sections (Executive Summary, Key Decisions, Discussion Highlights, Next Steps), ensuring consistent, scannable output with correctly attributed task ownership.
-- **Code Structure & Architecture**: The project maintains clear separation between client and server. The Flask backend adheres to RESTful conventions (`/api/upload`, `/api/transcribe`, `/api/summarize`, `/api/meetings`), while the React frontend leverages component modularity, optimistic UI state updates, and sanitization utilities to prevent raw markdown leaks.
-
----
-
 ## License
 
 Distributed under the MIT License.
