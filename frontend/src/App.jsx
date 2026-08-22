@@ -15,6 +15,7 @@ import {
   Loader2,
   Wand2
 } from 'lucide-react';
+import { API_ENDPOINTS } from './config';
 
 export default function App() {
   const [activeMeeting, setActiveMeeting] = useState(null);
@@ -31,7 +32,7 @@ export default function App() {
   const fetchMeetings = async () => {
     setIsHistoryLoading(true);
     try {
-      const res = await fetch('/api/meetings');
+      const res = await fetch(API_ENDPOINTS.meetings);
       if (res.ok) {
         const data = await res.json();
         setMeetings(data);
@@ -67,7 +68,7 @@ export default function App() {
     setErrorMessage(null);
 
     try {
-      const response = await fetch('/api/transcribe', {
+      const response = await fetch(API_ENDPOINTS.transcribe, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -116,7 +117,7 @@ export default function App() {
     setShowSummarySuccess(false);
 
     try {
-      const response = await fetch('/api/summarize', {
+      const response = await fetch(API_ENDPOINTS.summarize, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -165,7 +166,7 @@ export default function App() {
     }
 
     try {
-      await fetch(`/api/meetings/${id}`, { method: 'DELETE' });
+      await fetch(API_ENDPOINTS.meetingById(id), { method: 'DELETE' });
     } catch (err) {
       console.error('Failed to delete meeting record', err);
       // Rollback list if delete fails

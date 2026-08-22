@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, Music, FileAudio, AlertCircle, Loader2, ArrowRight, Sparkles } from 'lucide-react';
+import { API_ENDPOINTS } from '../config';
 
 const ALLOWED_EXTENSIONS = ['mp3', 'wav', 'm4a'];
 
@@ -65,7 +66,7 @@ export default function AudioUploader({ onUploadSuccess, isProcessing }) {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch(API_ENDPOINTS.upload, {
         method: 'POST',
         body: formData,
       });
