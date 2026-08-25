@@ -183,7 +183,3 @@ Meeting-Summarizer/
 ├── .gitignore                  # Excludes venv, node_modules, .env, uploads/*, *.db
 └── README.md                   # Project documentation & evaluation guide
 ```
-
-## License
-
-Distributed under the MIT License.
